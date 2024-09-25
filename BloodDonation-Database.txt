@@ -1,0 +1,291 @@
+--This is the Blood donation database.
+--
+--Inspiration for choosing this database:
+--During my studies I volunteered for Blood donation camps as part of community service.  
+--There we used handwritten forms to collect donor information who wished to donate blood. After a couple of camps I realised the 
+--process of using forms was challenging when the number of donors increased. Hence, this database is my attempt at creating a 
+--system that can store and manage data of donors, campaigns and further expanding it to include bloodbanks, hospitals and Patient
+--requests. 
+--
+--The design of this database is an attempt to ease the process of storing, retreving and managing 
+--donor, hospital and bloodbank information in an effective manner.
+--
+--There are 8 tables in the database : Donor, Campaign, Blood, BloodBank, BloodManager, Hospital, Patient, Request
+--
+--Donor Table : It contains the donor's personal information like name, address, contact etc.
+--
+--Campaign : This stores the information about the blood donation camps carried out.
+--
+--Blood Table : It stores Blood group information. The entries allowed include one of these types : A+,A-,B+,B-,AB+,AB-,O+,O-
+--
+--BloodBank Table : This table stores the information about Blood banks associated with every camps organized.
+--
+-- 
+--
+
+DROP table Blood CASCADE;
+DROP table BloodBank CASCADE;
+DROP table Hospital CASCADE;
+DROP table Patient CASCADE;
+DROP table BloodManager CASCADE;
+DROP table Donor CASCADE;
+DROP table Campaign CASCADE;
+DROP table Request CASCADE;
+
+
+Create table BloodBank
+(
+	Blood_bank_ID	integer,
+	Blood_Bank_Name	TEXT,
+	Blood_Bank_Address	 TEXT,
+      Blood_Bank_PhoneNo  TEXT,
+	Blood_Bank_Email    varchar,
+
+	CONSTRAINT Blood_bankID_PK PRIMARY KEY (Blood_bank_ID),
+
+	CONSTRAINT check_Blood_PhoneNo CHECK 
+                                    (Blood_Bank_PhoneNo ~ '^0\d{9}'),
+
+	CONSTRAINT check_Blood_BankEmail CHECK 
+						(Blood_Bank_Email LIKE '%_@__%.__%')
+
+);
+
+
+Create table Blood
+(
+	Blood_code	varchar,
+	Blood_type	TEXT,
+ 	Blood_bank_ID	integer,
+
+	CONSTRAINT Blood_code_PK PRIMARY KEY (Blood_code),
+
+	CONSTRAINT Blood_FK1 FOREIGN KEY(Blood_bank_ID) 
+							REFERENCES BloodBank ON DELETE RESTRICT,
+
+      CONSTRAINT check_Blood_type CHECK
+ 						(Blood_type in ('A+','A-','AB+','AB-','B+','B-','O+','O-')),
+
+      CONSTRAINT check_Blood_code CHECK (Blood_code ~ '^[A-Za-z0-9]+$')
+
+);
+
+
+
+Create table Hospital
+(
+	Hospital_ID	integer,
+	Hospital_Name	TEXT,
+	Hospital_Address	 TEXT,
+      Hospital_PhoneNo  TEXT,
+	Hospital_Email    varchar,
+
+	CONSTRAINT Hospital_PK PRIMARY KEY (Hospital_ID),
+
+	CONSTRAINT check_Hospital_PhoneNo CHECK ( Hospital_PhoneNo ~ '^0\d{9}'),
+
+	CONSTRAINT check_Hospital_Email CHECK (Hospital_Email LIKE '%_@__%.__%')
+
+);
+
+
+create table Patient
+(
+	Patient_ID	integer,
+      Patient_Name	TEXT,
+	Patient_Age	integer,
+	Patient_Address	TEXT,
+	Patient_PhoneNo	TEXT,
+	Patient_Condition TEXT,
+
+	CONSTRAINT Patient_PK PRIMARY KEY (Patient_ID),
+
+	CONSTRAINT check_Patient_PhoneNo CHECK ( Patient_PhoneNo ~ '^0\d{9}')
+
+);
+
+
+create table BloodManager
+(
+	Blood_bank_ID	integer,
+	Hospital_ID	integer,
+	BloodManager_Name	TEXT,
+
+	CONSTRAINT BloodManager_PK PRIMARY KEY(Blood_bank_ID,Hospital_ID),
+
+	CONSTRAINT BloodManager_FK1 FOREIGN KEY(Blood_bank_ID) 
+								REFERENCES BloodBank,
+
+	CONSTRAINT BloodManager_FK2 FOREIGN KEY(Hospital_ID) 
+								REFERENCES Hospital
+
+);
+
+
+create table Campaign
+(
+	Camp_ID integer,
+	Blood_bank_ID	integer,
+	Camp_Date DATE,
+	Camp_Address TEXT,
+	Camp_Email TEXT,
+	Camp_PhoneNo TEXT,
+
+	CONSTRAINT Campaign_PK PRIMARY KEY(Camp_ID),
+
+	CONSTRAINT Campaign_FK FOREIGN KEY(Blood_bank_ID) 
+								REFERENCES BloodBank ON DELETE RESTRICT,
+
+	CONSTRAINT check_Campaign_PhoneNo CHECK ( Camp_PhoneNo ~ '^0\d{9}'),
+
+	CONSTRAINT check_Campaign_Email CHECK (Camp_Email LIKE '%_@__%.__%')
+
+);
+
+create table Donor
+(
+	Donor_ID integer,
+	Blood_code	varchar,
+	Camp_ID integer,
+	Donor_Name TEXT,
+	Donor_Age	integer,
+	Donor_PhoneNo TEXT,
+	Donor_Address TEXT,
+	Donor_Email	TEXT,
+
+	CONSTRAINT Donor_PK PRIMARY KEY(Donor_ID),
+
+	CONSTRAINT Donor_FK1 FOREIGN KEY(Blood_code) REFERENCES Blood,
+
+      CONSTRAINT Donor_FK2 FOREIGN KEY(Camp_ID) REFERENCES Campaign on DELETE RESTRICT,
+
+      CONSTRAINT check_Donor_Age CHECK 
+						(Donor_Age > 0),
+
+	CONSTRAINT check_Donor_PhoneNo CHECK (Donor_PhoneNo ~ '^0\d{9}'),
+
+	CONSTRAINT check_Donor_Email CHECK (Donor_Email LIKE '%_@__%.__%')
+
+);
+
+create table Request
+(
+	Patient_ID	integer,
+	Hospital_ID	integer NOT NULL,
+	Request_Date DATE,
+	Request_Time TIME,
+	Group_Type	TEXT NOT NULL,
+
+	CONSTRAINT Request_PK PRIMARY KEY(Patient_ID,Hospital_ID),
+
+	CONSTRAINT Request_FK1 FOREIGN KEY(Patient_ID) REFERENCES Patient,
+
+	CONSTRAINT Request_FK2 FOREIGN KEY(Hospital_ID) REFERENCES Hospital ON DELETE RESTRICT,
+
+      CONSTRAINT check_Request_type CHECK
+						(Group_Type in ('A+','A-','AB+','AB-','B+','B-','O+','O-'))
+);
+
+
+
+-- Sample values for TABLE 'BloodBank'
+
+insert into BloodBank values(101,'Lifeline Blood Bank','23 XYZ St, NSW','0440783673','lifelinebb@life.com');
+insert into BloodBank values(121,'Sunshine Blood Bank','42 ABC St, NSW','0440898776','sunshinebb@sun.au');
+insert into BloodBank values(134,'WeCare Blood Bank','83 Sunny St, Vic','0443763546','wecarebb@care.au');
+insert into BloodBank values(66,'Treasure Blood Bank','62 Mary St, Vic','0443763546','treasurebb@tre.au');
+
+
+
+-- Sample values for TABLE 'Blood'
+
+insert into Blood values('BC011','A+',101);
+insert into Blood values('BC014','AB+',101);
+insert into Blood values('BC019','A+',101);
+insert into Blood values('BC036','O+',121);
+insert into Blood values('BC0233','B+',101);
+insert into Blood values('BC024','B-',134);
+insert into Blood values('BC0143','AB+',66);
+insert into Blood values('BC0122','AB-',101);
+insert into Blood values('BC0344','O+',134);
+insert into Blood values('BC0312','O-',66);
+insert into Blood values('BC0387','A-',66);
+insert into Blood values('BC0323','O+',134);
+
+
+
+-- Sample values for TABLE 'Hospital'
+
+insert into Hospital values(312,'You Heal Hospitals','57 Rain St, NSW','0498274907','youheal@enquiry.au');
+insert into Hospital values(75,'True Care Hospitals','92 Summer St, NSW','0499827307','truecare@care.au');
+insert into Hospital values(17,'First Choice Hospitals','33 Greek St, Vic','0467234200','firstchoice@choice.au');
+insert into Hospital values(86,'Trust Care Hospitals','43 Winner St, NSW','0443276549','trustcare@care.au');
+insert into Hospital values(142,'Healthify Hospitals','39 Dean St, Vic','0448346459','Healthify@care.au');
+
+
+
+--Sample values for TABLE 'Patient'
+
+insert into Patient values(10,'Mark',52,'12 Mally St, NSW','0422345186','Kidney issues');
+insert into Patient values(18,'Steve',38,'2/44 Ellary St, Vic','04209876872','Liver issues');
+insert into Patient values(22,'Sully',66,'28 Mount St, NSW','0409678346','Anemia');
+insert into Patient values(38,'Isa',49,'15/29 Para St, NSW','0444787345','Cancer');
+insert into Patient values(45,'David',35,'34 Jerry St, NSW','0452308998','Kidney issues');
+insert into Patient values(63,'Fred',29,'9 Hillary St, Vic','0446983564','Covid');
+insert into Patient values(77,'Lizze',45,'4 Merr St, Vic','0444777665','Cancer');
+
+
+
+--Sample values for TABLE 'BloodManager'
+
+insert into BloodManager values(121,75,'Care Manager');
+insert into BloodManager values(121,86,'WeCare Manager');
+insert into BloodManager values(66,17,'TrustUs Manager');
+insert into BloodManager values(134,17,'SaveLife Manager');
+insert into BloodManager values(101,312,'WeHeal Manager');
+
+
+
+
+--Sample values for TABLE 'Campaign'
+
+insert into Campaign values(17,121,'2022-06-12','15 Common St,NSW','service17@camp.au','0444763987');
+insert into Campaign values(24,121,'2022-06-12','33 Sussex St,NSW','service24@camp.au','0444773888');
+insert into Campaign values(37,66,'2022-10-08','35 Vale St,Vic','service37@camp.au','0433983502');
+insert into Campaign values(50,134,'2022-08-02','8 Curry St,Vic','service50@camp.au','0433654876');
+insert into Campaign values(88,101,'2022-08-23','19 April St,NSW','service88@camp.au','0444248897');
+
+
+
+--Sample values for TABLE 'Donor'
+
+insert into Donor values(14,'BC011',24,'Jack',28,'0456230945','7 Mapple St, NSW','jack@gmail.com');
+insert into Donor values(18,'BC0143',17,'Brad',25,'0456653826','23 Strom St, NSW','brad@gmail.com');
+insert into Donor values(31,'BC014',17,'Alice',27,'0444230587','31 Eddie St, NSW','alice@gmail.com');
+insert into Donor values(2,'BC019',37,'Nat',32,'0447730945','44 Drom St, Vic','nat@gmail.com');
+insert into Donor values(7,'BC0344',88,'Bill',28,'0458736355','16 Vale St, NSW','bill@gmail.com');
+insert into Donor values(11,'BC0233',50,'Kate',30,'0435872432','3 South St, Vic','kate@gmail.com');
+insert into Donor values(38,'BC0122',17,'Sim',27,'0438984322','3 West St, NSW','sim@gmail.com');
+
+
+
+--Sample values for TABLE 'Request'
+
+insert into Request values(18,17,'2022-06-06','09:42:17','O+');
+insert into Request values(22,312,'2022-02-11','19:10:30','AB+');
+
+insert into Request values(22,75,'2022-09-16','20:45:50','AB+');
+insert into Request values(10,75,'2022-09-16','03:00:00','A+');
+insert into Request values(38,75,'2022-09-02','18:00:11','O+');
+insert into Request values(18,75,'2022-09-06','05:55:07','O+');
+insert into Request values(45,75,'2022-09-24','23:55:00','A-');
+insert into Request values(77,75,'2022-09-14','05:14:43','A-');
+
+insert into Request values(45,86,'2022-09-25','00:30:12','A-');
+insert into Request values(38,86,'2022-09-02','22:10:52','O+');
+insert into Request values(10,86,'2022-09-15','09:30:33','A+');
+insert into Request values(22,86,'2022-09-17','01:12:05','AB+');
+insert into Request values(18,86,'2022-09-06','17:32:13','O+');
+
+
+

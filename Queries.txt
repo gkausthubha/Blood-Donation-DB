@@ -1,0 +1,81 @@
+--------------------------------------------------------------------
+ Few sample queries to demonstrate the working of the database
+--------------------------------------------------------------------
+
+
+Query 1: A simple query of a single table.
+
+- List the ID,name and contact information of all donors whose age is less than 30 years.
+
+ select Donor_ID, Donor_Name, Donor_PhoneNo, Donor_Email, Donor_Age from Donor 
+ where Donor_Age < 30
+ order by Donor_ID;
+
+
+
+Query 2 : A query which uses the words "natural join".
+
+- List Blood banks(Blood bank name, Contact number) and bloodtype of all
+blood banks where negative blood type is available.
+
+select Blood_bank_Name, Blood_bank_phoneNo, Blood_type
+from BloodBank NATURAL JOIN Blood
+where Blood_type LIKE '%-'
+order by Blood_bank_Name;
+
+
+Query 3 : The cross product equivalent to the "natural join" query above.
+
+- Above query using cross product
+
+select Blood_bank_Name, Blood_bank_phoneNo, Blood_type
+from BloodBank, Blood
+where BloodBank.Blood_bank_ID = Blood.Blood_bank_ID
+and Blood_type LIKE '%-'
+order by Blood_bank_Name;
+
+
+Query 4 : A query involving a “Group by”, perhaps also with a “HAVING”.
+
+- List the names of the hospitals with atleast 5 requests in the last month.
+
+select Hospital_Name, count(*) as No_of_requests
+from Hospital NATURAL JOIN Request
+where Request_Date >= '2022-09-01' and Request_Date < '2022-09-30'
+GROUP BY Hospital_Name
+Having count(Patient_ID) >= 5
+ORDER BY Hospital_Name;
+
+
+Query 5 : A query which uses a sub query.
+
+- Select the name of the blood banks who are associated with 'First Choice Hospitals'. 
+
+SELECT Blood_bank_name
+FROM BloodBank
+WHERE Blood_bank_ID IN( SELECT Blood_bank_ID 
+                        FROM BloodManager
+                        WHERE  Hospital_ID = 
+                         (SELECT Hospital_ID
+                          FROM Hospital  
+                          WHERE Hospital_Name ='First Choice Hospitals'));
+
+
+Query 6 : A cross product which cannot be implemented using the words “natural join” 
+
+- List the Donors who are from the same age group.
+
+select D1.Donor_ID, D1.Donor_Name,D1.Donor_Age 
+from Donor D1, Donor D2
+where D1.Donor_ID <> D2.Donor_ID 
+and D1.Donor_Age = D2.Donor_Age 
+order by D1.Donor_Age, D1.Donor_ID;
+
+
+
+Query 7: An example of a view.
+
+CREATE VIEW Camp_Info_NSW AS
+	SELECT Camp_ID, Blood_bank_name, Camp_date as Date, Camp_Address as Address
+      FROM Campaign NATURAL JOIN BloodBank
+      where Camp_Address LIKE '%NSW';
