@@ -25,6 +25,10 @@ The Blood Donation Database is designed to store and manage information related 
 
 An Entity-Relationship Diagram (ERD) is also provided in the repository to illustrate the database structure and relationships between the tables.
 
+**Sample Query File**
+
+A Sample Query File is included in the repository to demonstrate how the database works. The file contains example queries that show how to retrieve and manipulate data within the Blood Donation Database.
+
 **Future Enhancements**
 
 -Frontend Integration: Develop a user-friendly interface for easier data input and retrieval.
