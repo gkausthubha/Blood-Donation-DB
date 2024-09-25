@@ -12,9 +12,13 @@ The Blood Donation Database is designed to store and manage information related 
 **Key Features**
 
 -Donor Management: Stores personal information of donors, including contact details and blood group.
+
 -Campaign Tracking: Keeps records of blood donation campaigns, including location, date, and associated blood banks.
+
 -Blood Inventory: Manages blood group information and links to the respective blood banks.
+
 -Hospital and Patient Records: Maintains data on hospitals and patients, facilitating blood requests and supply management.
+
 -Data Integrity: Ensures data validity through constraints on fields like phone numbers, email addresses, and blood types.
 
 **ERD Diagram**
